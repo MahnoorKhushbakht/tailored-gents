@@ -12,7 +12,6 @@ import CommentListSkeleton from "@/components/CommentListSkeleton";
 import { notFound } from "next/navigation";
 
 // 🧩 Static data
-// 🧩 Static data
 const allCategories = {
   "formal-wear": [
     {
@@ -94,7 +93,7 @@ const allCategories = {
   ],
 };
 
-// 🧩 Extract image, summary, price
+// 🧩 Extract image, summary, and price
 function parseHTMLContent(html) {
   const imgMatch = html.match(/<img[^>]+src="([^">]+)"/);
   const imageUrl = imgMatch ? imgMatch[1] : "https://via.placeholder.com/300";
@@ -108,15 +107,10 @@ export default function Details({ params: { slug } }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // 🔐 Check if user JWT exists (from localStorage)
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const userData = JSON.parse(atob(token.split(".")[1]));
-        setUser(userData);
-      } catch (err) {
-        console.error("Invalid JWT token", err);
-      }
+    // ✅ Check if user is signed in
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser)); // e.g. { name: "Mahnoor" }
     }
   }, []);
 
@@ -133,6 +127,7 @@ export default function Details({ params: { slug } }) {
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-800 to-gray-950 text-white flex flex-col items-center">
       <div className="flex flex-col p-4 md:p-8 w-full md:w-3/4">
+        {/* Product Display */}
         <div className="flex flex-col md:flex-row justify-center items-center">
           <div className="relative w-[300px] h-[300px] mt-6">
             <Image
@@ -162,7 +157,7 @@ export default function Details({ params: { slug } }) {
               {`Price: ${content.price}`} Rs
             </p>
 
-            {/* 🛒 Add to Cart (disabled if not signed in) */}
+            {/* 🛒 Add to Cart */}
             <div className="mt-4 w-full flex justify-start">
               {user ? (
                 <Cart itemName={post.title.rendered} price={content.price} />

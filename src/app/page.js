@@ -1,29 +1,65 @@
-'use client';
-import Buttons from '@/components/Buttons';
-import Catalog from '@/components/Catalog';
-import Layout from '@/components/Layout';
-import Slideshow from '@/components/SlideShow';
+"use client";
+import Catalog from "@/components/Catalog";
+import { useEffect, useState } from "react";
 
-export default function HomePage() {
+const images = [
+  "/images/bg-img1.jpg",
+  "/images/bg-img2.jpg",
+  "/images/bg-img3.jpg",
+];
+
+const Slideshow = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Preload images
+  useEffect(() => {
+    images.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
+  // Change slides smoothly
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="h-screen">
-      <div className="relative w-full
-       h-full">
-        <Slideshow />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <h3 className="bg-clip-text text-transparent hover:bg-gradient-to-l bg-gradient-to-r from-gray-800 to-gray-900 text-3xl md:text-5xl font-extrabold">
-            Tailored Gents
-          </h3>
-          <div className="w-80 mt-4">
-            <p className="text-center text-gray-900 bg-clip-text text-wrap antialiased text-lg md:text-xl">
-              Discover timeless elegance and modern style with our <strong className="underline decoration-4 decoration-red-900/[.33]">meticulously</strong> curated collection of men clothing, <strong className="underline decoration-4 decoration-red-900/[.33]">tailored</strong> to elevate your everyday <strong className="underline decoration-4 decoration-red-900/[.33]">wardrobe</strong>.
-            </p>
-          </div>
-          <Catalog />
-          <Buttons />
+    <div className="relative w-full h-screen overflow-hidden">
+      {/* Background Images */}
+      {images.map((image, index) => (
+        <div
+          key={index}
+          className={`absolute inset-0 transition-opacity ease-in-out duration-[2000ms] will-change-transform ${
+            index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+          }`}
+        >
+          <img
+            src={image}
+            alt={`Slide ${index}`}
+            className="w-full h-full object-cover scale-105 transition-transform duration-[6000ms] ease-in-out"
+          />
         </div>
+      ))}
+
+      {/* Text Overlay */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white z-20 px-4">
+        <h1 className="text-4xl md:text-6xl font-semibold drop-shadow-lg tracking-wide animate-fadeIn">
+          Tailored Gents
+        </h1>
+        <p className="text-lg md:text-2xl mt-4 text-gray-200 max-w-xl animate-fadeIn delay-300">
+          Discover elegance crafted to perfection — where style meets confidence.
+        </p>
+        <Catalog/>
       </div>
+
+      {/* Optional gradient overlay for better text readability */}
+      <div className="absolute inset-0 bg-black/40 z-10"></div>
     </div>
   );
-}
+};
+
+export default Slideshow;
