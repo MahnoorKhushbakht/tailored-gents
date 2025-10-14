@@ -96,7 +96,7 @@ export default function ReviewPage({ params }) {
           {posts.map((post) => (
             <Link
               key={post.id}
-              href={`/product/${post.slug}`}
+              href={`/details/${post.slug}`}
               className="no-underline w-full sm:w-auto flex justify-center"
             >
               <Box className="bg-gray-900 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 w-80 flex flex-col justify-between cursor-pointer text-center">
