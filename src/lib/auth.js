@@ -1,3 +1,4 @@
+'use server';
 import { SignJWT,jwtVerify } from 'jose';
 import { cookies } from 'next/headers'
 import { cache } from 'react';
@@ -19,7 +20,7 @@ export async function setSessionCookie({ id, email, name }) {
       });
   }
 
-  export function deleteSessionCookie() {
+  export async function deleteSessionCookie() {
     cookies().delete(JWT_COOKIE);
   }
 const decodeSessionToken = cache(async (sessionToken) => {
@@ -32,7 +33,7 @@ const decodeSessionToken = cache(async (sessionToken) => {
   }
 });
 
- export function getUserFromSession() {
+ export async function getUserFromSession() {
     const sessionToken = cookies().get(JWT_COOKIE)?.value;
     if (sessionToken) {
       return decodeSessionToken(sessionToken);
