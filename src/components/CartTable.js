@@ -1,9 +1,10 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import { getCartData } from '@/lib/categories';
-import { ChakraProvider, Button } from '@chakra-ui/react';
-import CartTableSkeleton from './CartTableSkeleton';
-import Layout from './Layout';
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { getCartData } from "@/lib/categories";
+import { Button, Spinner } from "@chakra-ui/react";
+import Link from "next/link";
+import CartTableSkeleton from "./CartTableSkeleton";
 
 export default function CartTable({ userId }) {
   const [data, setData] = useState([]);
@@ -13,7 +14,6 @@ export default function CartTable({ userId }) {
     async function fetchData() {
       setLoading(true);
       const result = await getCartData();
-
       if (result && result.data) {
         setData(result.data);
       } else {
@@ -21,59 +21,71 @@ export default function CartTable({ userId }) {
       }
       setLoading(false);
     }
-
     fetchData();
   }, []);
 
   const handleDelete = async (cartId) => {
     try {
       const response = await fetch(`/api/cart?id=${cartId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete cart item');
-      }
+      if (!response.ok) throw new Error("Failed to delete cart item");
 
-      const result = await response.json();
-      console.log('Delete Result:', result);
-
-      setData(data.filter(cart => cart._id !== cartId));
+      setData((prev) => prev.filter((cart) => cart._id !== cartId));
     } catch (error) {
-      console.error('Error deleting cart item:', error);
+      console.error("Error deleting cart item:", error);
     }
   };
 
-  const filteredData = data.filter(cart => cart.user_id === userId);
+  const filteredData = data.filter((cart) => cart.user_id === userId);
 
   return (
     <>
       {loading ? (
         <CartTableSkeleton />
       ) : (
-    <>
-    <div className='flex bg-transparent justify-center text-2xl md:text-4xl py-2'>
-  <h1>Cart</h1>
-</div>
-          <div className="overflow-x-auto mx-3 md:mx-6">
-            <table className="table-auto w-full">
+        <div className="flex flex-col items-center py-8 px-4 text-white">
+          {/* 🛒 Title */}
+          <h1 className="text-3xl md:text-4xl font-bold text-center mb-6 bg-gradient-to-r from-gray-300 to-gray-500 bg-clip-text text-transparent">
+            Your Shopping Cart
+          </h1>
+
+          {/* 📦 Table */}
+          <div className="w-full max-w-5xl overflow-x-auto bg-gray-900/70 backdrop-blur-sm shadow-xl rounded-2xl border border-gray-700">
+            <table className="table-auto w-full text-sm md:text-base">
               <thead>
-                <tr>
-                  <th className="px-2 py-1">Product Name</th>
-                  <th className="px-2 py-1">Quantity</th>
-                  <th className="px-2 py-1">Price</th>
-                  <th className="px-2 py-1">Actions</th>
+                <tr className="bg-gray-800 text-gray-200">
+                  <th className="px-4 py-3 text-left font-semibold">Product</th>
+                  <th className="px-4 py-3 text-center font-semibold">
+                    Quantity
+                  </th>
+                  <th className="px-4 py-3 text-center font-semibold">Price</th>
+                  <th className="px-4 py-3 text-center font-semibold">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredData.length > 0 ? (
                   filteredData.map((cart, index) => (
-                    <tr key={index}>
-                      <td className="border px-2 py-1">{cart.product}</td>
-                      <td className="border px-2 py-1">{cart.quantity}</td>
-                      <td className="border px-2 py-1">{`${cart.price} Rs`}</td>
-                      <td className="border px-2 py-1">
-                        <Button colorScheme='red' onClick={() => handleDelete(cart._id)}>
+                    <tr
+                      key={index}
+                      className="border-t border-gray-700 hover:bg-gray-800/60 transition-all duration-200"
+                    >
+                      <td className="px-4 py-3">{cart.product}</td>
+                      <td className="px-4 py-3 text-center">
+                        {cart.quantity}
+                      </td>
+                      <td className="px-4 py-3 text-center text-gray-300 font-semibold">
+                        {`${cart.price} Rs`}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <Button
+                          colorScheme="red"
+                          size="sm"
+                          onClick={() => handleDelete(cart._id)}
+                        >
                           Delete
                         </Button>
                       </td>
@@ -81,20 +93,40 @@ export default function CartTable({ userId }) {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="border px-4 py-2 text-center">No data available</td>
+                    <td
+                      colSpan="4"
+                      className="text-center py-6 text-gray-400 italic"
+                    >
+                      Your cart is empty.
+                    </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-          <button
-            type="submit"
-            className="bg-gray-800 rounded mt-2 px-2 py-1 self-center text-gray-300 w-32 hover:bg-gray-900 disabled:bg-slate-500 disabled:cursor-not-allowed"
-            isDisabled={filteredData.length === 0}
-          >
-            CheckOut
-          </button>
-       </>
+
+          {/* 💳 Checkout Button */}
+          <div className="mt-6">
+            {filteredData.length > 0 ? (
+              <Link href="/checkout">
+                <button
+                  type="button"
+                  className="bg-gradient-to-r from-gray-700 to-gray-900 rounded-xl px-6 py-2 text-gray-200 font-semibold hover:scale-105 hover:from-gray-600 hover:to-gray-800 transition-all duration-300 shadow-lg"
+                >
+                  Proceed to Checkout
+                </button>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="bg-gray-700 text-gray-400 rounded-xl px-6 py-2 cursor-not-allowed opacity-70"
+              >
+                Proceed to Checkout
+              </button>
+            )}
+          </div>
+        </div>
       )}
     </>
   );

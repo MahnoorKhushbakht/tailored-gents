@@ -14,7 +14,7 @@ function Footer() {
             <Searchbox />
           </div>
         </div>
-        <p className="text-white text-sm">© {new Date().getFullYear()} TailorGents. All rights reserved.</p>
+        <p className="text-white text-sm">© 2024 TailorGents. All rights reserved.</p>
       </div>
     </footer>
   );

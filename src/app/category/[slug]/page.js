@@ -1,4 +1,4 @@
-"use client"; // 👈 Forces full client-side rendering
+"use client"; 
 
 import "@/app/css/style.css";
 import { Box } from "@chakra-ui/react";
@@ -8,7 +8,14 @@ import CardData from "@/components/CardContent";
 import Link from "next/link";
 import { useMemo } from "react";
 
-// 🧩 Static category data
+/* 
+  🧩 FALLBACK DATA NOTICE:
+  The following `allCategories` object serves as a local fallback 
+  in case the WordPress API is unavailable or fails to fetch data.
+  It helps maintain site functionality and user experience offline 
+  or during API downtime.
+*/
+
 const allCategories = {
   "formal-wear": [
     {
@@ -74,7 +81,7 @@ function parseHTMLContent(html) {
 export default function ReviewPage({ params }) {
   const slug = params?.slug;
   const posts = useMemo(() => allCategories[slug] || [], [slug]);
-
+   
   if (posts.length === 0) {
     return (
       <div className="flex items-center justify-center h-screen text-white text-xl">

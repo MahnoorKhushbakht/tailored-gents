@@ -11,7 +11,14 @@ import CommentList from "@/components/CommentList";
 import CommentListSkeleton from "@/components/CommentListSkeleton";
 import { notFound } from "next/navigation";
 
-const allCategories = {
+/* 
+  🧩 FALLBACK DATA NOTICE:
+  The following `allCategories` object serves as a local fallback 
+  in case the WordPress API is unavailable or fails to fetch data.
+  It helps maintain site functionality and user experience offline 
+  or during API downtime.
+*/
+const fallbackCategories = {
   "formal-wear": [
     {
       id: 1,
@@ -20,7 +27,7 @@ const allCategories = {
       content: {
         rendered: `
           <p>Perfect for formal occasions. Tailored to perfection with premium fabric.</p>
-          <img src="https://images.unsplash.com/photo-1602810318383-e386cc2a3d3d" />
+          <img src="/images/classic-black-suit.jpg" />
           <p>Price: 8999</p>
         `,
       },
@@ -32,7 +39,7 @@ const allCategories = {
       content: {
         rendered: `
           <p>A timeless navy blazer that combines style and sophistication.</p>
-          <img src="https://images.unsplash.com/photo-1593032465171-8b02e8d49e29" />
+          <img src="/images/navy-blue-blazer.jpg" />
           <p>Price: 6999</p>
         `,
       },
@@ -46,7 +53,7 @@ const allCategories = {
       content: {
         rendered: `
           <p>Lightweight denim jacket — perfect for casual evenings.</p>
-          <img src="https://images.unsplash.com/photo-1533670801800-93afd7b3e9b6" />
+          <img src="/images/denim-jacket.jpg" />
           <p>Price: 4999</p>
         `,
       },
@@ -58,7 +65,7 @@ const allCategories = {
       content: {
         rendered: `
           <p>Trendy graphic tee for your everyday look.</p>
-          <img src="https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb" />
+          <img src="/images/graphic-tshirt.jpg" />
           <p>Price: 1999</p>
         `,
       },
@@ -72,7 +79,7 @@ const allCategories = {
       content: {
         rendered: `
           <p>Genuine leather belt with a modern buckle design.</p>
-          <img src="https://images.unsplash.com/photo-1600185365483-26d7a2f3b6b8" />
+          <img src="/images/leather-belt.jpg" />
           <p>Price: 1499</p>
         `,
       },
@@ -84,7 +91,7 @@ const allCategories = {
       content: {
         rendered: `
           <p>Elegant wristwatch that adds sophistication to your outfit.</p>
-          <img src="https://images.unsplash.com/photo-1504051771394-dd2e66b2e08f" />
+          <img src="/images/classic-wristwatch.jpg" />
           <p>Price: 5999</p>
         `,
       },
@@ -92,17 +99,24 @@ const allCategories = {
   ],
 };
 
+// 🧠 Helper Function — Parse HTML safely
 function parseHTMLContent(html) {
   const imgMatch = html.match(/<img[^>]+src="([^">]+)"/);
-  const imageUrl = imgMatch ? imgMatch[1] : "https://via.placeholder.com/300";
+  const imageUrl = imgMatch ? imgMatch[1] : "/images/placeholder.jpg";
   const text = html.replace(/<[^>]+>/g, "").replace(/Price:.*/, "").trim();
   const priceMatch = html.match(/Price:\s*(\d+)/);
   const price = priceMatch ? priceMatch[1] : "N/A";
   return { imageUrl, summary: text, price };
 }
 
+// 🖼️ Main Component
 export default function DetailsData({ params: { slug }, user }) {
-  const category = Object.values(allCategories).find(cat =>
+  // Normally, you'd fetch data from your WordPress API here.
+  // If that fails, fallbackCategories will be used.
+  // Example:
+  // const data = (await fetchWordPressData()) || fallbackCategories;
+
+  const category = Object.values(fallbackCategories).find(cat =>
     cat.some(item => item.slug === slug)
   );
 
@@ -115,23 +129,26 @@ export default function DetailsData({ params: { slug }, user }) {
     <div className="min-h-screen bg-gradient-to-r from-gray-800 to-gray-950 text-white flex flex-col items-center">
       <div className="flex flex-col p-4 md:p-8 w-full md:w-3/4">
         <div className="flex flex-col md:flex-row justify-center items-center">
-          <div className="relative w-[300px] h-[300px] mt-6">
+          {/* 🖼️ Product Image */}
+          <div className="relative w-[300px] h-[300px] mt-6 rounded-xl overflow-hidden shadow-2xl">
             <Image
               src={content.imageUrl}
               alt={post.title.rendered}
               fill
-              className="object-cover rounded-lg"
+              className="object-cover rounded-xl transition-transform duration-300 hover:scale-105"
               priority
+              sizes="(max-width: 768px) 100vw, 400px"
             />
           </div>
 
-          <div className="md:ml-8 mt-6 md:mt-0 flex flex-col items-start">
+          {/* 📄 Product Info */}
+          <div className="md:ml-8 mt-6 md:mt-0 flex flex-col items-start space-y-3">
             <div className="flex flex-row items-center gap-3">
               <h2 className="text-xl font-bold uppercase">{post.title.rendered}</h2>
               <ShareLinkButton />
             </div>
 
-            <p className="mt-2 text-gray-200">{content.summary}</p>
+            <p className="text-gray-300 leading-relaxed">{content.summary}</p>
 
             <SpecsBtn>
               <div className="text-white bg-gray-900 rounded p-2 w-auto mt-4 inline-block">
@@ -139,8 +156,8 @@ export default function DetailsData({ params: { slug }, user }) {
               </div>
             </SpecsBtn>
 
-            <p className="bg-gray-600 text-white p-2 rounded w-40 mt-4 text-center text-lg shadow-lg">
-              {`Price: ${content.price}`} Rs
+            <p className="bg-gray-700 text-white p-2 rounded w-40 mt-4 text-center text-lg shadow-md">
+              Price: {content.price} Rs
             </p>
 
             <div className="mt-4 w-full flex justify-start">
@@ -149,7 +166,7 @@ export default function DetailsData({ params: { slug }, user }) {
               ) : (
                 <button
                   disabled
-                  className="bg-gray-600 text-gray-300 px-4 py-2 rounded cursor-not-allowed opacity-60"
+                  className="bg-gray-700 text-gray-400 px-4 py-2 rounded cursor-not-allowed opacity-60"
                 >
                   Sign in to add to cart
                 </button>
@@ -158,8 +175,11 @@ export default function DetailsData({ params: { slug }, user }) {
           </div>
         </div>
 
-        <div className="mt-8 w-full">
-          <h2 className="text-lg font-bold text-white uppercase mb-2">Reviews</h2>
+        {/* 💬 Reviews Section */}
+        <div className="mt-10 w-full">
+          <h2 className="text-lg font-bold uppercase mb-3 border-b border-gray-600 pb-1">
+            Reviews
+          </h2>
           {user ? (
             <>
               <CommentForm slug={slug} userName={user?.name || "Guest"} />
@@ -168,7 +188,7 @@ export default function DetailsData({ params: { slug }, user }) {
               </Suspense>
             </>
           ) : (
-            <p className="text-gray-400 text-center border border-gray-600 rounded-md p-3">
+            <p className="text-gray-400 text-center border border-gray-700 rounded-md p-3 mt-4">
               Sign in to comment
             </p>
           )}
